@@ -1,0 +1,171 @@
+﻿@page "/RegistrarVuelo";
+@using System.Net.Http;
+@using System.Net.Http.Json;
+@using Data;
+@using Newtonsoft.Json;
+@inject HttpClient http;
+@inject NavigationManager navigationManager;
+
+<h3>Programar Vuelo</h3>
+<br />
+<EditForm Model="@registrarVuelo">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Ciudad Origen</label>
+                    <div class="col-sm-9">
+
+                        <Select class="form-control" @onchange="SeleccionarCiudadOrigen">
+                            @foreach (var elemento in listaCiudades)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </Select>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Ciudad Destino</label>
+                    <div class="col-sm-9">
+                        <Select class="form-control" @onchange="SeleccionarCiudadDestino">
+                            @foreach (var elemento in listaCiudades)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </Select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Fecha</label>
+                    <div class="col-sm-9">
+                        <InputDate min="@registrarVuelo.Fecha.ToString("yyyy-MM-dd")" class="form-control" @bind-Value="@registrarVuelo.Fecha"></InputDate>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Hora Salida</label>
+                    <div class="col-sm-9">
+                        <InputText type="time" class="form-control" @bind-Value="@registrarVuelo.HoraSalida"></InputText>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Hora Llegada</label>
+                    <div class="col-sm-9">
+                        <InputText type="time" class="form-control" @bind-Value="@registrarVuelo.HoraLlegada"></InputText>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Aerolinea</label>
+                    <div class="col-sm-9">
+                        <Select class="form-control" @onchange="SeleccionarAerolinea">
+                            @foreach (var elemento in listaAerolineas)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </Select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>N° Vuelo</label>
+                    <div class="col-sm-9">
+                        <InputText class="form-control" @bind-Value="@registrarVuelo.NumeroVuelo"></InputText>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group row mb-1">
+                <div class="col-sm-9">
+                    <button class="btn btn-success" @onclick="ProgramarVuelo">Programar Vuelos</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code {
+
+    RegistroVuelosModel registrarVuelo = new();
+    List<ListaModel> listaCiudades = new();
+    List<ListaModel> listaAerolineas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Response responseCiudad = new();
+        Response responseAerolinea = new();
+
+        string urlCiudades = "api/Ciudades";
+        string urlAerolineas = "api/Aerolineas";
+
+        responseCiudad = await http.GetFromJsonAsync<Response>(urlCiudades) ?? responseCiudad;
+        responseAerolinea = await http.GetFromJsonAsync<Response>(urlAerolineas) ?? responseAerolinea;
+
+        if (responseCiudad.Data is not null)
+        {
+            string dataJson = responseCiudad.Data.ToString()!;
+            listaCiudades = JsonConvert.DeserializeObject<List<ListaModel>>(dataJson)!;
+        }
+
+        if (responseAerolinea.Data is not null)
+        {
+            string dataJson = responseAerolinea.Data.ToString()!;
+            listaAerolineas = JsonConvert.DeserializeObject<List<ListaModel>>(dataJson)!;
+        }
+
+        registrarVuelo.Fecha = DateTime.Now;
+    }
+
+    void SeleccionarCiudadOrigen(ChangeEventArgs e)
+    {
+        registrarVuelo.IdCiudadOrigen = Convert.ToInt32(e.Value);
+    }
+
+    void SeleccionarCiudadDestino(ChangeEventArgs e)
+    {
+        registrarVuelo.IdCiudadDestino = Convert.ToInt32(e.Value);
+
+        if (registrarVuelo.IdCiudadDestino.Equals(registrarVuelo.IdCiudadOrigen))
+        {
+           
+        }
+    }
+
+    void SeleccionarAerolinea(ChangeEventArgs e)
+    {
+        registrarVuelo.IdAerolinea = Convert.ToInt32(e.Value);
+    }
+
+    private async Task ProgramarVuelo()
+    {
+        Response responseRegistro = new();
+        string url = "api/Vuelos";
+        registrarVuelo.IdEstado = 4;
+        var _response = await http.PostAsJsonAsync<RegistroVuelosModel>(url, registrarVuelo);
+        responseRegistro = _response.Content.ReadFromJsonAsync<Response>().Result!;
+        navigationManager.NavigateTo("/Vuelos");
+    }
+}

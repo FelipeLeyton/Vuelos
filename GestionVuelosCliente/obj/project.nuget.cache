@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "BgV6Z1t8Qcc+/6alrbo0BKDPYBC+GPbAIyClm06dCPKDzL0bawIorq0BRWWio4JByVxG6KjUps++yTdGqzKJ6A==",
+  "success": true,
+  "projectFilePath": "E:\\Pruba_Carvajal\\GestionVuelos\\GestionVuelosCliente\\GestionVuelosCliente.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\andre\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

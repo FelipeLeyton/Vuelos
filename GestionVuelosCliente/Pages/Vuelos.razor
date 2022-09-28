@@ -1,0 +1,84 @@
+﻿@page "/Vuelos";
+@using System.Net.Http;
+@using System.Net.Http.Json;
+@using Data;
+@using Newtonsoft.Json;
+@inject HttpClient http;
+@inject NavigationManager navigationManager;
+
+<h3>Vuelos</h3>
+<br />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6">
+            <button class="btn btn-primary" @onclick="RegistrarVuelo">Programar Vuelos</button>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td>N° Vuelo</td>
+                        <td>Aerolinea</td>
+                        <td>Estado</td>
+                        <td>Acciones</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (response.Data is not null)
+                    {
+                        @foreach (var elemento in responseList)
+                        {
+                            <tr>
+                                <td>@elemento.NumeroVuelo</td>
+                                <td>@elemento.Aerolinea</td>
+                                <td>@elemento.Estado</td>
+                                <td>
+                                    <button class="btn btn-primary" @onclick="() => EditarVuelo(elemento.Id)">Editar</button>
+                                    <button class="btn btn-danger" @onclick="() => EliminarVuelo(elemento.Id,elemento.NumeroVuelo!)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    public string url = "api/Vuelos";
+    public Response response = new();
+    List<VuelosModel> responseList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await http.GetFromJsonAsync<Response>(url) ?? response;
+
+        VuelosModel vuelosModel = new();
+
+        if (response.Data is not null)
+        {
+            string dataJson = response.Data.ToString()!;
+            responseList = JsonConvert.DeserializeObject<List<VuelosModel>>(dataJson)!;
+        }
+    }
+
+    private void RegistrarVuelo()
+    {
+        navigationManager.NavigateTo("/RegistrarVuelo");
+    }
+
+    private void EditarVuelo(int id)
+    {
+        navigationManager.NavigateTo("/EditarVuelo/" + id);
+    }
+
+    private void EliminarVuelo(int id, string numeroVuelo)
+    {
+        navigationManager.NavigateTo("/EliminarVuelo/" + id + "/" + numeroVuelo);
+    }
+}

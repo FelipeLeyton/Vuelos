@@ -1,0 +1,206 @@
+﻿@page "/EditarVuelo/{id:int}";
+@using Data;
+@using Newtonsoft.Json;
+@inject HttpClient http;
+@inject NavigationManager navigationManager;
+
+<h3>Editar Vuelo</h3>
+<br />
+<EditForm Model="@editarVuelo">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Ciudad Origen</label>
+                    <div class="col-sm-9">
+                        <InputSelect class="form-control" @bind-Value="@editarVuelo.IdCiudadOrigen" @onchange="SeleccionarCiudadOrigen">
+                            @foreach (var elemento in listaCiudades)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Ciudad Destino</label>
+                    <div class="col-sm-9">
+                        <InputSelect class="form-control" @bind-Value="editarVuelo.IdCiudadDestino" @onchange="SeleccionarCiudadDestino">
+                            @foreach (var elemento in listaCiudades)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Fecha</label>
+                    <div class="col-sm-9">
+                        <InputDate min="@editarVuelo.Fecha.ToString("yyyy-MM-dd")" class="form-control" @bind-Value="@editarVuelo.Fecha"></InputDate>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Estado</label>
+                    <div class="col-sm-9">
+                        <InputSelect class="form-control" @bind-Value="editarVuelo.IdEstado" @onchange="SeleccionarEstado">
+                            @foreach (var elemento in listaEstados)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Hora Salida</label>
+                    <div class="col-sm-9">
+                        <InputText type="time" class="form-control" @bind-Value="@editarVuelo.HoraSalida"></InputText>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Hora Llegada</label>
+                    <div class="col-sm-9">
+                        <InputText type="time" class="form-control" @bind-Value="@editarVuelo.HoraLlegada"></InputText>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>Aerolinea</label>
+                    <div class="col-sm-9">
+                        <InputSelect class="form-control" @bind-Value="@editarVuelo.IdAerolinea" @onchange="SeleccionarAerolinea">
+                            @foreach (var elemento in listaAerolineas)
+                            {
+                                <option value="@elemento.Id">@elemento.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group row mb-1">
+                    <label>N° Vuelo</label>
+                    <div class="col-sm-9">
+                        <InputText class="form-control" @bind-Value="@editarVuelo.NumeroVuelo"></InputText>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group row mb-1">
+                <div class="col-sm-9">
+                    <button class="btn btn-success" @onclick="EditarVuelos">Editar Vuelo</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    public Response response = new();
+    RegistroVuelosModel editarVuelo = new();
+    List<ListaModel> listaCiudades = new();
+    List<ListaModel> listaAerolineas = new();
+    List<ListaModel> listaEstados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Response responseCiudad = new();
+        Response responseAerolinea = new();
+        Response responseEstados = new();
+
+        string url = "api/Vuelos/" + Convert.ToInt32(id);
+        string urlCiudades = "api/Ciudades";
+        string urlAerolineas = "api/Aerolineas";
+        string urlEstados = "api/Estados";
+
+        responseCiudad = await http.GetFromJsonAsync<Response>(urlCiudades) ?? responseCiudad;
+        responseAerolinea = await http.GetFromJsonAsync<Response>(urlAerolineas) ?? responseAerolinea;
+        responseEstados = await http.GetFromJsonAsync<Response>(urlEstados) ?? responseEstados;
+
+        if (responseCiudad.Data is not null)
+        {
+            string dataJson = responseCiudad.Data.ToString()!;
+            listaCiudades = JsonConvert.DeserializeObject<List<ListaModel>>(dataJson)!;
+        }
+
+        if (responseAerolinea.Data is not null)
+        {
+            string dataJson = responseAerolinea.Data.ToString()!;
+            listaAerolineas = JsonConvert.DeserializeObject<List<ListaModel>>(dataJson)!;
+        }
+
+        if (responseEstados.Data is not null)
+        {
+            string dataJson = responseEstados.Data.ToString()!;
+            listaEstados = JsonConvert.DeserializeObject<List<ListaModel>>(dataJson)!;
+        }
+
+        response = await http.GetFromJsonAsync<Response>(url) ?? response;
+
+        if (response.Data is not null)
+        {
+            string dataJson = response.Data.ToString()!;
+            editarVuelo = JsonConvert.DeserializeObject<RegistroVuelosModel>(dataJson)!;
+        }
+    }
+
+    void SeleccionarCiudadOrigen(ChangeEventArgs e)
+    {
+        editarVuelo.IdCiudadOrigen = Convert.ToInt32(e.Value);
+    }
+
+    void SeleccionarCiudadDestino(ChangeEventArgs e)
+    {
+        editarVuelo.IdCiudadDestino = Convert.ToInt32(e.Value);
+
+        if (editarVuelo.IdCiudadDestino.Equals(editarVuelo.IdCiudadOrigen))
+        {
+
+        }
+    }
+
+    void SeleccionarAerolinea(ChangeEventArgs e)
+    {
+        editarVuelo.IdAerolinea = Convert.ToInt32(e.Value);
+    }
+
+    void SeleccionarEstado(ChangeEventArgs e)
+    {
+        editarVuelo.IdEstado = Convert.ToInt32(e.Value);
+    }
+
+    private async Task EditarVuelos()
+    {
+        Response responseRegistro = new();
+        string url = "api/Vuelos" ;
+        editarVuelo.Id = id;
+        var _response = await http.PutAsJsonAsync<RegistroVuelosModel>(url, editarVuelo);
+        responseRegistro = _response.Content.ReadFromJsonAsync<Response>().Result!;
+        navigationManager.NavigateTo("/Vuelos");
+    }
+}

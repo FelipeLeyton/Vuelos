@@ -1,0 +1,5 @@
+E:\Pruba_Carvajal\GestionVuelos\GestionVuelos\obj\Debug\net6.0\GestionVuelosApi.csproj.AssemblyReference.cache
+E:\Pruba_Carvajal\GestionVuelos\GestionVuelos\obj\Debug\net6.0\GestionVuelosApi.GeneratedMSBuildEditorConfig.editorconfig
+E:\Pruba_Carvajal\GestionVuelos\GestionVuelos\obj\Debug\net6.0\GestionVuelosApi.AssemblyInfoInputs.cache
+E:\Pruba_Carvajal\GestionVuelos\GestionVuelos\obj\Debug\net6.0\GestionVuelosApi.AssemblyInfo.cs
+E:\Pruba_Carvajal\GestionVuelos\GestionVuelos\obj\Debug\net6.0\GestionVuelosApi.csproj.CoreCompileInputs.cache
